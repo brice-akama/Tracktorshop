@@ -1,0 +1,45 @@
+// utils/images.ts
+// utils/images.ts
+
+export const imagePaths = {
+  hero: '/assets/hero.jpg',
+  blakeprada: '/assets/Brake-pedal.jpg',
+  fuelinjector: '/assets/Fuel-injector.jpg',
+  hydraulicpump: '/assets/Hydraulic-Pump.jpg',
+  hydraulic: '/assets/Hydraulic.jpg',
+  oilfilter: '/assets/Oil-Filter.jpg',
+  powersteering: '/assets/Power-Steering.jpg',
+  startersolenoid: '/assets/Starter-Solenoid.jpg',
+  waterpump: '/assets/Water- pump.jpg',
+  gasterset: '/assets/Gasket Set.jpg',
+  engineparts: '/assets/Engine-parts.jpg',
+  enginespring: '/assets/Engine-Spring.jpg',
+  fortlight: '/assets/Froad-light.jpg',
+  steeringknucckle: '/assets/Steering-Knuckle.jpg',
+  steeringshaft: '/assets/Steering-shaft.jpg',
+  tieroad: '/assets/Tie Rod Steering.jpg',
+  uppertop: '/assets/Upper Top Engine Cylinder.jpg',
+  steeringbearings: '/assets/Steering-Bearing.jpg',
+  valves: '/assets/Valves.jpg',
+  controlve: '/assets/Control Valve.jpg',
+  hmr37: '/assets/HMR 37.jpg',
+  hydrauliccylinde: '/assets/Hydraulic cylinder.jpg',
+  hydraulicgearpum: '/assets/Hydraulic Gear Pump.jpg',
+  hydraulicorbital: '/assets/Hydraulic Orbital.jpg',
+  spool3: '/assets/Spool 3 Hydraulic.jpg',
+  hydraulicpowerunite: '/assets/Hydraulic Power Unit.jpg',
+  airfilter: '/assets/air filter.jpg',
+  dieselpump: '/assets/Diesel Injection Pump.jpg',
+  fuelinjection: '/assets/Fuel Injection Pump.jpg',
+  hydraulicgearpu: '/assets/Hydraulic pump for Case IH.jpg',
+  hydraulicgearpump: '/assets/Hydraulic Power Unit.jpg',
+  johndeere: '/assets/john deere.jpg',
+  flywheel: '/assets/Flywheel.jpg',
+  priston: '/assets/priston.jpg',
+  clutch: '/assets/Clutch.png',
+  brake: '/assets/Brake.jpg',
+  hydraulic1: '/assets/Hydraulic1.jpg',
+  
+  
+};
+
