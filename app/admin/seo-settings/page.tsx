@@ -14,7 +14,7 @@ interface SEOFormProps {
   };
 }
 
-export default function SEOForm({ productId, initialData }: SEOFormProps) {
+const SEOForm: React.FC<SEOFormProps> = ({ productId, initialData }) => {
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [keywords, setKeywords] = useState(initialData?.keywords?.join(", ") || "");
@@ -111,4 +111,6 @@ export default function SEOForm({ productId, initialData }: SEOFormProps) {
       </form>
     </div>
   );
-}
+};
+
+export default SEOForm;
