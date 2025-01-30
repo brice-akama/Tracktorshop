@@ -10,7 +10,7 @@ const LogoutPage = () => {
 
   const handleLogout = () => {
     // Logic to handle logout (e.g., clearing session or token)
-    // Redirect to the homepage or login page
+    // Redirect to the login page
     router.push("/admin/login");
   };
 
