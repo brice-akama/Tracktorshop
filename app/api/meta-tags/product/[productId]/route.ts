@@ -3,10 +3,10 @@ import { ObjectId } from 'mongodb';
 import clientPromise from "../../../../lib/mongodb"; // Adjust the path to your database connection
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request, context: { params: { productId: string } }) {
+// Typing the context properly
+export async function GET(request: Request, { params }: { params: { productId: string } }) {
   try {
-    // Await the params to resolve
-    const { productId } = await context.params;
+    const { productId } = params;  // No need to use await here
 
     // Validate product ID
     if (!ObjectId.isValid(productId)) {
@@ -49,9 +49,9 @@ export async function GET(request: Request, context: { params: { productId: stri
   }
 }
 
-export async function POST(request: Request, context: { params: { productId: string } }) {
+export async function POST(request: Request, { params }: { params: { productId: string } }) {
   try {
-    const { productId } = context.params;
+    const { productId } = params;
 
     if (!ObjectId.isValid(productId)) {
       return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
