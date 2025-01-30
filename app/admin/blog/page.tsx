@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image'; // Import Image component from next/image
 
 export default function CreateBlogPost() {
   const [title, setTitle] = useState('');
@@ -95,7 +96,14 @@ export default function CreateBlogPost() {
           {preview && (
             <div className="mt-4">
               <p className="text-sm font-medium mb-2">Image Preview:</p>
-              <img src={preview} alt="Preview" className="max-w-xs rounded-lg border border-gray-300" />
+              {/* Using next/image for optimized image loading */}
+              <Image
+                src={preview}
+                alt="Preview"
+                className="max-w-xs rounded-lg border border-gray-300"
+                width={300} // Set a specific width
+                height={200} // Set a specific height
+              />
             </div>
           )}
         </div>

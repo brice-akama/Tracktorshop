@@ -1,7 +1,7 @@
 // app/product/[productId]/ProductDetails.tsx
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -66,9 +66,10 @@ const ProductDetails = ({ product, relatedProducts }: ProductDetailsProps) => {
         window.dispatchEvent(new Event('cartUpdated'));
         router.push('/cart');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
-    }
+   }
+   
   };
 
   return (

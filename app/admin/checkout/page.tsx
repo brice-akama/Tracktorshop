@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image'; // Import Image from next/image
 
 interface CartItem {
   productId: string;
@@ -56,8 +57,12 @@ const OrdersList = () => {
         setOrders(data.orders);
         toast.dismiss(loadingToastId);
         toast.success('Orders fetched successfully!');
-      } catch (error: any) {
-        toast.error(error.message || 'Something went wrong while fetching orders.');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || 'Something went wrong while fetching orders.');
+        } else {
+          toast.error('Something went wrong while fetching orders.');
+        }
       } finally {
         setLoading(false);
       }
@@ -133,10 +138,12 @@ const OrdersList = () => {
                       key={index}
                       className="flex items-center space-x-4 border-b pb-4 last:border-b-0"
                     >
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.name}
-                        className="w-16 h-16 object-cover rounded"
+                        width={64} // specify width and height
+                        height={64} // specify width and height
+                        className="object-cover rounded"
                       />
                       <div>
                         <p>

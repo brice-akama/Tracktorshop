@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image'; // Import Image from next/image
 
 interface BlogPost {
-  id: string;
+  id: string; // This is your post ID (could be any other field)
   title: string;
   imageUrl: string;
   content: string;
   author: string;
   createdAt: string;
+  _id?: string; // Add the optional _id field for MongoDB-style IDs
 }
 
 export default function BlogPage() {
@@ -19,13 +21,14 @@ export default function BlogPage() {
     const fetchPosts = async () => {
       try {
         const res = await fetch('/api/blog'); // No need for an ID
-        const data = await res.json();
+        const data: BlogPost[] = await res.json(); // Type the data as BlogPost[]
+
         console.log('API Response:', data);
-  
+
         if (Array.isArray(data)) {
           setPosts(
-            data.map((post: any) => ({
-              id: post._id,
+            data.map((post) => ({
+              id: post._id || post.id, // Use _id if available, fallback to 'id'
               title: post.title,
               content: post.content.slice(0, 100) + '...', // Preview of content
               author: post.author,
@@ -40,10 +43,10 @@ export default function BlogPage() {
         console.error('Error fetching posts:', error);
       }
     };
-  
+
     fetchPosts();
   }, []);
-  
+
   return (
     <div>
       <h1 className="text-3xl font-bold mt-10">Blog</h1>
@@ -51,9 +54,11 @@ export default function BlogPage() {
         {posts.length > 0 ? (
           posts.map((post) => (
             <div key={post.id} className="border rounded-lg shadow-md p-4">
-              <img
+              <Image
                 src={post.imageUrl}
                 alt={post.title}
+                width={500} // Provide width and height
+                height={300}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
               <h2 className="text-xl font-semibold mb-2">{post.title}</h2>

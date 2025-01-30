@@ -1,7 +1,5 @@
 "use client";
 
-
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation"; // Import Image component
@@ -23,7 +21,7 @@ const PopularSet = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [popularSetProducts, setPopularSetProducts] = useState<Popular[]>([]); 
   const router = useRouter();
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(1); // You can remove this if not using
 
   // Fetch special offer products from the backend API
   useEffect(() => {
@@ -73,7 +71,7 @@ const PopularSet = () => {
     }, 3000);
 
     return () => clearInterval(interval); // Cleanup on unmount
-  }, [startIndex, itemsPerPage]);
+  }, [startIndex, itemsPerPage, popularSetProducts.length]); // Added popularSetProducts.length
 
   const handleNext = () => {
     if (startIndex + itemsPerPage < popularSetProducts.length) {
@@ -87,46 +85,43 @@ const PopularSet = () => {
     }
   };
 
-  
-
   const visibleProducts = popularSetProducts.slice(
     startIndex,
     startIndex + itemsPerPage
   );
 
   // Handle Add to Cart action
-    const handleAddToCart = async (product: Popular) => {  // Accept the product as a parameter
-      const cartItem = {
-        productId: product._id,
-        quantity,
-      };
-      try {
-        const response = await fetch('/api/cart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(cartItem),
-        });
-        const data = await response.json();
-        if (data.error) {
-          toast.error(data.error, { position: 'top-center', duration: 3000 });
-        } else {
-          toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
-          window.dispatchEvent(new Event('cartUpdated'));
-          router.push('/cart');
-        }
-      } catch (error) {
-        toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
-      }
+  const handleAddToCart = async (product: Popular) => {  // Accept the product as a parameter
+    const cartItem = {
+      productId: product._id,
+      quantity,
     };
-  
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cartItem),
+      });
+      const data = await response.json();
+      if (data.error) {
+        toast.error(data.error, { position: 'top-center', duration: 3000 });
+      } else {
+        toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
+        window.dispatchEvent(new Event('cartUpdated'));
+        router.push('/cart');
+      }
+    } catch (error) {
+      toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
+    }
+  };
 
   return (
     <div className="w-full py-12 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">
-        POPULAR SETS
+          POPULAR SETS
         </h2>
 
         <div className="flex justify-between items-center">
@@ -200,4 +195,3 @@ const PopularSet = () => {
 };
 
 export default PopularSet;
-

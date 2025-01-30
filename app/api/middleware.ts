@@ -14,7 +14,7 @@ export async function middleware(req: Request) {
   try {
     jwt.verify(token, process.env.JWT_SECRET || 'default_secret');
     return NextResponse.next(); // Continue to the next request if valid
-  } catch (error) {
+  } catch {
     return NextResponse.redirect(new URL('/admin/login', req.url)); // Redirect if token is invalid
   }
 }

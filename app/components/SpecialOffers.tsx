@@ -71,7 +71,7 @@ const SpecialOffers = () => {
     }, 3000);
 
     return () => clearInterval(interval); // Cleanup on unmount
-  }, [startIndex, itemsPerPage]);
+  }, [startIndex, itemsPerPage, specialOfferProducts.length]); // Fixed dependency
 
   const handleNext = () => {
     if (startIndex + itemsPerPage < specialOfferProducts.length) {

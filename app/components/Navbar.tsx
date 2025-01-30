@@ -15,6 +15,13 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const [isSearchPopupVisible, setIsSearchPopupVisible] = useState(false);
 
+
+  interface CartItem {
+    quantity: number;
+    // Add any other properties that the items may have
+  }
+  
+
   
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -74,22 +81,23 @@ const Navbar: React.FC = () => {
   ];
 
  // Function to fetch cart count from the backend
-  const fetchCartCount = async () => {
-    try {
-      const response = await fetch('/api/cart', { method: 'GET', credentials: 'include' });
-      const data = await response.json();
+ const fetchCartCount = async () => {
+  try {
+    const response = await fetch('/api/cart', { method: 'GET', credentials: 'include' });
+    const data = await response.json();
 
-      if (response.ok && data.cart?.items) {
-        const totalCount = data.cart.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
-        setCartCount(totalCount);
-      } else {
-        setCartCount(0); // Set to 0 if no cart is found
-      }
-    } catch (error) {
-      console.error('Error fetching cart count:', error);
-      setCartCount(0); // Fallback in case of error
+    if (response.ok && data.cart?.items) {
+      const totalCount = data.cart.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
+      setCartCount(totalCount);
+    } else {
+      setCartCount(0); // Set to 0 if no cart is found
     }
-  };
+  } catch (error) {
+    console.error('Error fetching cart count:', error);
+    setCartCount(0); // Fallback in case of error
+  }
+};
+
 
 
   

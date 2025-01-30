@@ -14,7 +14,7 @@ const CompanyInfo: React.FC = () => {
 
       {/* Second Paragraph - Product Range */}
       <p className="mt-6 text-2xl text-gray-700 leading-relaxed">
-        At PowerPlow, we specialize in offering a wide range of tractor parts, from essential components to specialized accessories. Whether you're looking for replacement parts or upgrades, we have everything you need to ensure that your machinery operates at peak performance. Our extensive product catalog includes parts for all major tractor models, giving you the flexibility and peace of mind to find exactly what you need.
+        At PowerPlow, we specialize in offering a wide range of tractor parts, from essential components to specialized accessories. Whether you&apos;re looking for replacement parts or upgrades, we have everything you need to ensure that your machinery operates at peak performance. Our extensive product catalog includes parts for all major tractor models, giving you the flexibility and peace of mind to find exactly what you need.
       </p>
 
       {/* Third Paragraph - Pricing and Value */}
@@ -24,7 +24,7 @@ const CompanyInfo: React.FC = () => {
 
       {/* Fourth Paragraph - Customer Service */}
       <p className="mt-6 text-2xl text-gray-700 leading-relaxed">
-        Our team at PowerPlow is not just focused on selling parts – we are passionate about building relationships with our customers. We offer exceptional customer service and expert advice to help you make informed decisions. Whether you need help choosing the right parts or have a question about installation, our knowledgeable staff is here to assist you every step of the way.
+        Our team at PowerPlow is not just focused on selling parts &ndash; we are passionate about building relationships with our customers. We offer exceptional customer service and expert advice to help you make informed decisions. Whether you need help choosing the right parts or have a question about installation, our knowledgeable staff is here to assist you every step of the way.
       </p>
 
       {/* Fifth Paragraph - Shipping */}
@@ -39,7 +39,7 @@ const CompanyInfo: React.FC = () => {
 
       {/* Closing Paragraph - Final Assurance */}
       <p className="mt-8 text-xl text-gray-600">
-        Whether you're a seasoned farmer or just starting out, PowerPlow is here to provide you with the parts and expertise you need to keep your equipment performing at its best.
+        Whether you&apos;re a seasoned farmer or just starting out, PowerPlow is here to provide you with the parts and expertise you need to keep your equipment performing at its best.
       </p>
     </div>
   );

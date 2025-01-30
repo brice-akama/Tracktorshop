@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import ReactQRCode from 'react-qr-code';
+import Image from 'next/image';
 
 interface CartItem {
   productId: string;
@@ -24,7 +25,7 @@ export default function Checkout() {
     phone: '',
     address: '',
     country: '',
-    postalCode: '',                                 // /api/checkout
+    postalCode: '', // /api/checkout
     region: '',
   });
 
@@ -33,29 +34,29 @@ export default function Checkout() {
       toast.error('You must agree to the terms.');
       return;
     }
-  
+
     if (!paymentMethod) {
       toast.error('Please select a payment method.');
       return;
     }
-  
+
     const orderData = {
       paymentMethod,
       cart,
       billingDetails,
       agreedTerms: isAgreed,
     };
-  
+
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData),
       });
-  
+
       const data = await response.json();
       console.log("Response data:", data);
-  
+
       if (response.ok) {
         toast.success(`Order placed! Order ID: ${data.orderId}`);
       } else {
@@ -65,7 +66,7 @@ export default function Checkout() {
       toast.error('Failed to place order.');
     }
   };
-  
+
   useEffect(() => {
     const fetchCart = async () => {
       const response = await fetch('/api/cart');
@@ -219,10 +220,12 @@ export default function Checkout() {
           <div className="space-y-4">
             {cart.items.map((item) => (
               <div key={item.productId} className="flex items-center gap-4">
-                <img
+                <Image
                   src={item.image || '/placeholder.png'}
                   alt={item.name}
-                  className="w-16 h-16 object-cover rounded-md"
+                  width={64}
+                  height={64}
+                  className="object-cover rounded-md"
                 />
                 <div>
                   <p className="font-semibold">{item.name}</p>

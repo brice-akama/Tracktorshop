@@ -2,8 +2,6 @@
 
 "use client";
 
-
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation"; // Import Image component
@@ -25,7 +23,6 @@ const OtherBrand = () => {
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [tractorBrandsProducts, setTractorBrandsProducts] = useState<Popular[]>([]); 
   const router = useRouter();
-  const [quantity, setQuantity] = useState(1);
 
   // Fetch special offer products from the backend API
   useEffect(() => {
@@ -38,8 +35,8 @@ const OtherBrand = () => {
         } else {
           console.error("Failed to fetch products");
         }
-      } catch (error) {
-        console.error("Error fetching products:", error);
+      } catch (err) {
+        console.error("Error fetching products:", err);
       }
     };
 
@@ -75,7 +72,7 @@ const OtherBrand = () => {
     }, 3000);
 
     return () => clearInterval(interval); // Cleanup on unmount
-  }, [startIndex, itemsPerPage]);
+  }, [startIndex, itemsPerPage, tractorBrandsProducts.length]); // Added dependency on tractorBrandsProducts.length
 
   const handleNext = () => {
     if (startIndex + itemsPerPage < tractorBrandsProducts.length) {
@@ -89,45 +86,43 @@ const OtherBrand = () => {
     }
   };
 
-  
-
   const visibleProducts = tractorBrandsProducts.slice(
     startIndex,
     startIndex + itemsPerPage
   );
 
   // Handle Add to Cart action
-    const handleAddToCart = async (product: Popular) => {  // Accept the product as a parameter
-      const cartItem = {
-        productId: product._id,
-        quantity,
-      };
-      try {
-        const response = await fetch('/api/cart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(cartItem),
-        });
-        const data = await response.json();
-        if (data.error) {
-          toast.error(data.error, { position: 'top-center', duration: 3000 });
-        } else {
-          toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
-          window.dispatchEvent(new Event('cartUpdated'));
-          router.push('/cart');
-        }
-      } catch (error) {
-        toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
-      }
+  const handleAddToCart = async (product: Popular) => {  // Accept the product as a parameter
+    const cartItem = {
+      productId: product._id,
+      quantity: 1,  // Fixed quantity, as it's not being used for dynamic updates
     };
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cartItem),
+      });
+      const data = await response.json();
+      if (data.error) {
+        toast.error(data.error, { position: 'top-center', duration: 3000 });
+      } else {
+        toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
+        window.dispatchEvent(new Event('cartUpdated'));
+        router.push('/cart');
+      }
+    } catch (err) {
+      toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
+    }
+  };
 
   return (
     <div className="w-full py-12 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">
-        OTHER TRACTOR BRANDS
+          OTHER TRACTOR BRANDS
         </h2>
 
         <div className="flex justify-between items-center">

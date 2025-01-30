@@ -27,8 +27,6 @@ const ContactUs: React.FC = () => {
         body: JSON.stringify(formData),
       });
   
-      
-  
       const data = await response.json(); // This might throw the error
   
       if (!response.ok) {
@@ -53,7 +51,7 @@ const ContactUs: React.FC = () => {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-800">Contact Us</h1>
         <p className="text-lg text-gray-600 mt-4">
-          Have questions? We'd love to hear from you! Get in touch with us using the form below or through the provided
+          Have questions? We&apos;d love to hear from you! Get in touch with us using the form below or through the provided
           contact details.
         </p>
       </div>

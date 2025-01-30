@@ -22,7 +22,7 @@ const SupportPage = () => {
 
       <section className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Contact Our Support Team</h2>
-        <p>If you cannot find the answer you're looking for, please feel free to contact us directly via the <a href="/contact-us" className="text-blue-400">Contact Us</a> page.</p>
+        <p>If you cannot find the answer you&apos;re looking for, please feel free to contact us directly via the <a href="/contact-us" className="text-blue-400">Contact Us</a> page.</p>
       </section>
     </div>
   );

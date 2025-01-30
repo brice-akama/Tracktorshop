@@ -27,7 +27,6 @@ export default function CartPage() {
   const [discount, setDiscount] = useState(0);
   const [newTotal, setNewTotal] = useState(100); // Example total
 
-
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -38,8 +37,12 @@ export default function CartPage() {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Failed to fetch cart data.');
         setCart(data.cart || { guestId: '', items: [] });
-      } catch (error: any) {
-        setError(error.message || 'An unexpected error occurred.');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message || 'An unexpected error occurred.');
+        } else {
+          setError('An unexpected error occurred.');
+        }
       } finally {
         setLoading(false);
       }
@@ -65,14 +68,15 @@ export default function CartPage() {
       } else {
         toast.error(data.message || 'Invalid coupon');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error('Something went wrong');
-      console.error(error);
+      if (error instanceof Error) {
+        console.error(error);
+      } else {
+        console.error('Unknown error', error);
+      }
     }
   };
-
-
-
 
   const handleRemoveItem = async (productId: string) => {
     try {
@@ -82,25 +86,28 @@ export default function CartPage() {
         body: JSON.stringify({ productId }),
         credentials: 'include',
       });
-  
+
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to remove item.');
-  
+
       // Update the local state for the cart after removing the item
       setCart((prevCart) =>
         prevCart
           ? { ...prevCart, items: prevCart.items.filter((item) => item.productId !== productId) }
           : null
       );
-  
+
       // Trigger cart update event to update the cart count in Navbar
       window.dispatchEvent(new Event('cartUpdated'));
-  
-    } catch (error: any) {
-      setError(error.message || 'Failed to remove item.');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || 'Failed to remove item.');
+      } else {
+        setError('Failed to remove item.');
+      }
     }
   };
-  
+
   const handleUpdateQuantity = async (productId: string, quantity: number) => {
     try {
       const response = await fetch('/api/cart', {
@@ -121,8 +128,12 @@ export default function CartPage() {
             }
           : null
       );
-    } catch (error: any) {
-      setError(error.message || 'Failed to update quantity.');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || 'Failed to update quantity.');
+      } else {
+        setError('Failed to update quantity.');
+      }
     }
   };
 
@@ -166,7 +177,6 @@ export default function CartPage() {
               </div>
               <div className="flex items-center space-x-4 mt-4 md:mt-0">
                 <div>
-                  
                   <div className="flex items-center space-x-2 ">
                     <button
                       onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
@@ -200,19 +210,22 @@ export default function CartPage() {
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           {/* Coupon Section */}
           <div className="flex flex-col md:flex-row items-center space-x-4 border p-2 rounded">
-  <input
-    type="text"
-    value={coupon}
-    onChange={(e) => setCoupon(e.target.value)}
-    placeholder="Enter coupon code"
-    className="flex-grow border p-2 rounded-sm text-sm w-full md:w-1/2 lg:w-1/2" // Adjust width for medium and larger devices
-  />
-  <button  onClick={applyCoupon} className="px-4 py-2 bg-blue-500 text-white rounded-sm text-sm mt-2 md:mt-0 md:ml-2">
-  SUBMIT
-  </button>
-  <p className="mt-4 whitespace-nowrap">Discount: ${discount}</p>
-  <p  className="mt-4 whitespace-nowrap">New Total: ${newTotal}</p>
-</div>
+            <input
+              type="text"
+              value={coupon}
+              onChange={(e) => setCoupon(e.target.value)}
+              placeholder="Enter coupon code"
+              className="flex-grow border p-2 rounded-sm text-sm w-full md:w-1/2 lg:w-1/2" // Adjust width for medium and larger devices
+            />
+            <button
+              onClick={applyCoupon}
+              className="px-4 py-2 bg-blue-500 text-white rounded-sm text-sm mt-2 md:mt-0 md:ml-2"
+            >
+              SUBMIT
+            </button>
+            <p className="mt-4 whitespace-nowrap">Discount: ${discount}</p>
+            <p className="mt-4 whitespace-nowrap">New Total: ${newTotal}</p>
+          </div>
 
           {/* Cart Summary Section */}
           <div className="p-4 border rounded shadow">
@@ -226,10 +239,9 @@ export default function CartPage() {
               <span>${calculateSubtotal().toFixed(2)}</span>
             </div>
             <button className="w-full mt-4 px-4 py-2 bg-green-500 text-white rounded">
-            <Link href="/checkout" prefetch={true} className="btn">
-  Proceed to Checkout
-</Link>
-
+              <Link href="/checkout" prefetch={true} className="btn">
+                Proceed to Checkout
+              </Link>
             </button>
             <Link href="/product" className="text-blue-500 no-underline mt-4 block text-center">
               Continue Shopping
@@ -240,4 +252,3 @@ export default function CartPage() {
     </div>
   );
 }
-

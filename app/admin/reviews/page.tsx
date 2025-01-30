@@ -41,35 +41,34 @@ const AdminReviewsPanel = () => {
 
   useEffect(() => {
     fetchReviews(); // Call fetchReviews on component load and when productId changes
-  }, [productId]);
+  }, [productId, fetchReviews]); // Added fetchReviews to dependencies
 
   // Handle review update
-const updateReview = async (reviewId: string, updatedReview: Partial<Review>) => {
-  try {
-    const response = await fetch(`/api/reviews`, {
-      method: "PUT",
-      body: JSON.stringify({ reviewId, ...updatedReview }),
-      headers: { "Content-Type": "application/json" },
-    });
+  const updateReview = async (reviewId: string, updatedReview: Partial<Review>) => {
+    try {
+      const response = await fetch(`/api/reviews`, {
+        method: "PUT",
+        body: JSON.stringify({ reviewId, ...updatedReview }),
+        headers: { "Content-Type": "application/json" },
+      });
 
-    const data = await response.json();
-    if (response.ok) {
-      toast.success("Review updated successfully");
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Review updated successfully");
 
-      // Update the review in state without re-fetching all reviews
-      setReviews((prevReviews) =>
-        prevReviews.map((review) =>
-          review._id === reviewId ? { ...review, ...updatedReview, updatedAt: new Date().toISOString() } : review
-        )
-      );
-    } else {
-      toast.error(data.message || "Failed to update review");
+        // Update the review in state without re-fetching all reviews
+        setReviews((prevReviews) =>
+          prevReviews.map((review) =>
+            review._id === reviewId ? { ...review, ...updatedReview, updatedAt: new Date().toISOString() } : review
+          )
+        );
+      } else {
+        toast.error(data.message || "Failed to update review");
+      }
+    } catch {
+      toast.error("Error updating review");
     }
-  } catch (error) {
-    toast.error("Error updating review");
-  }
-};
-
+  };
 
   // Handle review deletion
   const deleteReview = async (reviewId: string) => {
@@ -89,7 +88,7 @@ const updateReview = async (reviewId: string, updatedReview: Partial<Review>) =>
       } else {
         toast.error(data.message || "Failed to delete review");
       }
-    } catch (error) {
+    } catch {
       toast.error("Error deleting review");
     }
   };

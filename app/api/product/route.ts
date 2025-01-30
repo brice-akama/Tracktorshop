@@ -9,6 +9,22 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_SECRET_KEY!,
 });
 
+// Define the type for the product fields
+interface ProductFields {
+  name?: string;
+  category?: string;
+  price?: number;
+  quantity?: number;
+  description?: string;
+  specialOffer?: boolean;
+  popularSet?: boolean;
+  hydraulicPart?: boolean;
+  tractorBrands?: boolean;
+  mainImage?: string;
+  images?: string[];
+  createdAt?: Date;
+}
+
 // POST: Add a new product
 export async function POST(req: Request) {
   try {
@@ -155,7 +171,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const formData = await req.formData();
-    const updatedFields: Record<string, any> = {};
+    const updatedFields: ProductFields = {}; // Use the specific ProductFields type
 
     if (formData.has("name")) updatedFields.name = formData.get("name") as string;
     if (formData.has("category")) updatedFields.category = formData.get("category") as string;
@@ -239,4 +255,3 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
-

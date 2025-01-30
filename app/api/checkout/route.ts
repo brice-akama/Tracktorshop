@@ -1,4 +1,4 @@
-import clientPromise from '../../lib/mongodb';  
+import clientPromise from '../../lib/mongodb';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';  // Import uuid
 
@@ -8,10 +8,20 @@ interface CartItem {
   quantity: number;
 }
 
+// Define a more specific type for billing details
+interface BillingDetails {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
 interface OrderRequestBody {
   paymentMethod: string;
   cart: { items: CartItem[] };
-  billingDetails: Record<string, any>; // Use a more specific type based on your billing details structure
+  billingDetails: BillingDetails; // Use the more specific BillingDetails type here
   agreedTerms: boolean;
 }
 
@@ -72,7 +82,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET() {  // Removed the `req: Request` parameter since it's unused
   try {
     // Connect to the database
     const client = await clientPromise;

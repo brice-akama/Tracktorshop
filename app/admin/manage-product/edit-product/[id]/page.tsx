@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation"; // Import useRouter for navigation
 import { toast } from "react-hot-toast";
+import Image from "next/image";  // Import Image from next/image
 
 type Product = {
   _id: string;
@@ -72,6 +73,7 @@ const EditProductPage = () => {
         }
       } catch (error) {
         toast.error("An error occurred while fetching the product");
+        console.error("Error occurred:", error);  // Logs the error
       } finally {
         setLoading(false);
       }
@@ -186,10 +188,12 @@ const EditProductPage = () => {
             className="w-full p-2 border rounded"
           />
           {editedFields.mainImage && (
-            <img
+            <Image
               src={editedFields.mainImage}
               alt="Product Preview"
-              className="w-32 h-32 mt-2 object-cover rounded border"
+              width={128}
+              height={128}
+              className="mt-2 object-cover rounded border"
             />
           )}
         </div>
@@ -289,7 +293,7 @@ const EditProductPage = () => {
 
           {/* SEO Canonical */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">SEO Canonical URL</label>
+            <label className="block text-sm font-medium mb-1">Canonical URL</label>
             <input
               type="text"
               value={seoFields.canonical}
@@ -300,7 +304,7 @@ const EditProductPage = () => {
 
           <button
             type="submit"
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           >
             Save SEO Settings
           </button>

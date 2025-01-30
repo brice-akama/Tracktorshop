@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import Image from "next/image";
 
 // Define the product type
 type Product = {
@@ -76,7 +77,6 @@ const ManageProductPage = () => {
   };
 
   // Submit edited product details
-
   const handleSave = async () => {
     if (!editingProduct) return;
 
@@ -129,8 +129,6 @@ const ManageProductPage = () => {
     }
   };
 
-
-
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Manage Products</h1>
@@ -147,9 +145,15 @@ const ManageProductPage = () => {
         <tbody>
           {products.map((product) => (
             <tr key={product._id}>
-              <td className="border px-4 py-2">
-                <img src={product.mainImage} alt={product.name} className="w-24 h-24 object-cover" />
-                {product.name}
+              <td className="border px-4 py-2 flex items-center">
+                <Image
+                  src={product.mainImage}
+                  alt={product.name}
+                  width={96}
+                  height={96}
+                  className="object-cover"
+                />
+                <span className="ml-2">{product.name}</span>
               </td>
               <td className="border px-4 py-2">{product.category}</td>
               <td className="border px-4 py-2">{product.price}</td>

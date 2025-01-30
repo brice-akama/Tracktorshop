@@ -12,11 +12,12 @@ const LoginPage: React.FC = () => {
     setShowRegistration(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
-    const email = (e.target as any).email.value;
-    const password = (e.target as any).password.value;
+    // Type casting for form elements
+    const email = (e.target as HTMLFormElement).email.value;
+    const password = (e.target as HTMLFormElement).password.value;
   
     const response = await fetch("/api/login", {
       method: "POST",
@@ -42,11 +43,12 @@ const LoginPage: React.FC = () => {
     }
   };
   
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
-    const email = (e.target as any).email.value;
-    const password = (e.target as any).password.value;
+    // Type casting for form elements
+    const email = (e.target as HTMLFormElement).email.value;
+    const password = (e.target as HTMLFormElement).password.value;
   
     const response = await fetch("/api/register", {
       method: "POST",
@@ -82,7 +84,7 @@ const LoginPage: React.FC = () => {
             <>
               <h3 className="text-lg text-gray-700 mb-2">Register Account</h3>
               <p className="text-gray-600 mb-6">
-                By creating an account you will be able to shop faster, be up to date on an order's status, and keep
+                By creating an account you will be able to shop faster, be up to date on an order&apos;s status, and keep
                 track of the orders you have previously made.
               </p>
               <button

@@ -2,7 +2,7 @@ import clientPromise from "../../lib/mongodb"; // Ensure this points to your Mon
 import { ObjectId } from "mongodb";
 
 // GET handler
-export async function GET(req: Request) {
+export async function GET() {  // Removed the unused 'req' parameter
   console.log("GET request received");
   try {
     const client = await clientPromise;
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     const settingsCollection = db.collection("settings");
 
     // Ensure '_id' is excluded from the updatedSettings object
-    const { _id, ...settingsToUpdate } = updatedSettings;
+    const { _id, ...settingsToUpdate } = updatedSettings;  // '_id' is excluded
 
     // Perform the update without the '_id' field
     await settingsCollection.updateOne(

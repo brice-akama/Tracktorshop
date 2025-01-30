@@ -10,6 +10,13 @@ interface BlogPost {
   imageUrl: string;
 }
 
+// Define the API response shape
+interface ApiBlogPost {
+  _id: string;
+  title: string;
+  imageUrl: string;
+}
+
 export default function RecentPosts() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
 
@@ -17,11 +24,11 @@ export default function RecentPosts() {
     const fetchPosts = async () => {
       try {
         const res = await fetch('/api/blog?limit=3');
-        const data = await res.json();
+        const data: ApiBlogPost[] = await res.json();  // Specify the expected shape here
 
         if (Array.isArray(data)) {
           setPosts(
-            data.map((post: any) => ({
+            data.map((post) => ({
               id: post._id, // Map _id from the API to id
               title: post.title,
               imageUrl: post.imageUrl,

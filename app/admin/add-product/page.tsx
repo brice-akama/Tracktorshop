@@ -1,8 +1,9 @@
 "use client";
 
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Image from "next/image"; // Keep the Image import
 import { toast } from "react-hot-toast";
 
 const AddProduct = () => {
@@ -100,7 +101,6 @@ const AddProduct = () => {
     }
   };
 
-
   return (
     <div className="container mx-auto p-8">
       <h2 className="text-2xl font-semibold mb-4">Add Product</h2>
@@ -178,7 +178,7 @@ const AddProduct = () => {
                 accept="image/*"
                 onChange={(e) => handleImageUpload(e, "main")}
               />
-              {mainImage && <img src={mainImage} alt="Main Product" className="w-full h-32 object-cover mt-2" />}
+              {mainImage && <Image src={mainImage} alt="Main Product" width={200} height={200} className="w-full h-32 object-cover mt-2" />}
             </div>
             {Array(3).fill(null).map((_, index) => (
               <div key={index} className="col-span-1">
@@ -187,14 +187,14 @@ const AddProduct = () => {
                   accept="image/*"
                   onChange={(e) => handleImageUpload(e, "additional")}
                 />
-                {images[index] && <img src={images[index]} alt={`Product Image ${index + 1}`} className="w-full h-32 object-cover mt-2" />}
+                {images[index] && <Image src={images[index]} alt={`Product Image ${index + 1}`} width={200} height={200} className="w-full h-32 object-cover mt-2" />}
               </div>
             ))}
           </div>
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium">Choosed Your Options</label>
+          <label className="block text-sm font-medium">Choose Your Options</label>
           <div>
             <label className="inline-flex items-center">
               <input
