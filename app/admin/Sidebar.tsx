@@ -12,15 +12,15 @@ const menuItems = [
   { name: 'Manage Products', path: '/admin/manage-product' },
   { name: 'Users', path: '/admin/users' },
   { name: 'Manage Reviews', path: '/admin/reviews' },
-  { name: 'Orders', path: '/admin/orders' },
-  { name: 'Blog Management', path: '/admin/blogs' },
+  { name: 'Orders', path: '/admin/checkout' },
+  { name: 'Blog Management', path: '/admin/blog' },
   { name: 'Reports', path: '/admin/reports' },
   { name: 'SEO Settings', path: '/admin/seo-settings' },
-  { name: 'List Product', path: '/admin/list-product' },
-  { name: 'Customer Messages', path: '/admin/messages' },
+  { name: 'List Product', path: '/admin/manage-product/edit-product' },
+  { name: 'Coupon', path: '/admin/coupon' },
   { name: 'Media', path: '/admin/media' },
   { name: 'Settings', path: '/admin/settings' },
-  { name: 'Logout', path: '/logout' },
+  { name: 'Logout', path: '/admin/logout' },
 ];
 
 const Sidebar: React.FC = () => {

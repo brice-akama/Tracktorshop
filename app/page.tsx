@@ -7,6 +7,7 @@ import PopularSet from './components/PopularSet';
 import HydraulicPower from './components/hydraulicPower';
 import OtherBrand from './components/OtherBrand';
 import NewsletterSubscription from "./components/NewsletterSubscription";
+import RecentPosts from './components/RecentPosts';
 
 
 
@@ -24,6 +25,7 @@ const Home: React.FC = () => {      //  HydraulicPower
       <HydraulicPower /> 
       <OtherBrand  />
       <NewsletterSubscription />
+      <RecentPosts />
 
       
 

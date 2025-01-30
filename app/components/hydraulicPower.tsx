@@ -1,14 +1,48 @@
 "use client";
 
+
+
 import React, { useState, useEffect } from "react";
-import { hydraulic } from "../../utils/products"; // Import product data from the utils folder
-import Image from "next/image"; // Import Image component
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import Image from "next/image";
+import { useRouter } from "next/navigation"; // Import Image component
+import Link from "next/link"; 
+import { toast } from 'react-hot-toast';// Import Link component for navigation
+
+// Define the types for product data
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  mainImage: string;
+  description: string;
+  hydraulicPart: boolean;
+}
 
 const HydraulicPower = () => {
   const [startIndex, setStartIndex] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(4); // Default to 4 items
-  const router = useRouter(); // Use Next.js useRouter hook for navigation
+  const [itemsPerPage, setItemsPerPage] = useState(4);
+  const [ hydraulicPartProducts, setHydraulicPartProducts] = useState<Product[]>([]); // State to store special offers
+  const router = useRouter();
+   const [quantity, setQuantity] = useState(1);
+
+  // Fetch special offer products from the backend API
+  useEffect(() => {
+    const fetchHydraulicPart = async () => {
+      try {
+        const response = await fetch("/api/product?hydraulicPart=true"); // Your API endpoint
+        if (response.ok) {
+          const data = await response.json();
+          setHydraulicPartProducts(data.products); // Set fetched data to state
+        } else {
+          console.error("Failed to fetch products");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchHydraulicPart();
+  }, []);
 
   // Update itemsPerPage based on screen size
   useEffect(() => {
@@ -31,7 +65,7 @@ const HydraulicPower = () => {
   // Auto-shift the carousel every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      if (startIndex + itemsPerPage < hydraulic.length) {
+      if (startIndex + itemsPerPage <   hydraulicPartProducts.length) {
         setStartIndex((prev) => prev + 1);
       } else {
         setStartIndex(0); // Reset to the beginning
@@ -42,7 +76,7 @@ const HydraulicPower = () => {
   }, [startIndex, itemsPerPage]);
 
   const handleNext = () => {
-    if (startIndex + itemsPerPage < hydraulic.length) {
+    if (startIndex + itemsPerPage <   hydraulicPartProducts.length) {
       setStartIndex(startIndex + 1);
     }
   };
@@ -53,23 +87,46 @@ const HydraulicPower = () => {
     }
   };
 
-  const handleAddToCart = (productId: string | number) => {
-    // Assuming you have some cart management logic here to add the product
-    // Add product to cart (You can implement your cart logic here)
+ 
 
-    router.push("/cart"); // Navigate to cart page without reloading the page
-  };
+  const visibleProducts =   hydraulicPartProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
-  // Filter products with hydraulicPart: true
-  const visibleProducts = hydraulic
-    .filter((product) => product.hydraulicPart === true)
-    .slice(startIndex, startIndex + itemsPerPage);
+  // Handle Add to Cart action
+    const handleAddToCart = async (product: Product) => {  // Accept the product as a parameter
+      const cartItem = {
+        productId: product._id,
+        quantity,
+      };
+      try {
+        const response = await fetch('/api/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cartItem),
+        });
+        const data = await response.json();
+        if (data.error) {
+          toast.error(data.error, { position: 'top-center', duration: 3000 });
+        } else {
+          toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
+          window.dispatchEvent(new Event('cartUpdated'));
+          router.push('/cart');
+        }
+      } catch (error) {
+        toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
+      }
+    };
+  
 
   return (
     <div className="w-full py-12 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto text-center">
-        <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-8">
-          HYDRAULIC PARTS FOR TRUCKS & CRANES
+        <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">
+        HYDRAULIC PARTS FOR TRUCKS & CRANES
         </h2>
 
         <div className="flex justify-between items-center">
@@ -77,8 +134,7 @@ const HydraulicPower = () => {
           <button
             onClick={handlePrevious}
             disabled={startIndex === 0}
-            className={`text-2xl px-4 ${startIndex === 0 ? "text-gray-400" : "text-gray-800"
-              }`}
+            className={`text-2xl px-4 ${startIndex === 0 ? "text-gray-400" : "text-gray-800"}`}
           >
             &lt;
           </button>
@@ -87,29 +143,31 @@ const HydraulicPower = () => {
           <div className="flex justify-center gap-6">
             {visibleProducts.map((product) => (
               <div
-                key={product.id}
+                key={product._id}
                 className="relative border border-gray-300 rounded-lg p-4 w-64 shadow-lg hover:shadow-xl transition-shadow"
               >
-                {/* Product Image */}
-                <div className="relative group">
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    width={300}
-                    height={300}
-                    style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    className="rounded-lg"
-                  />
+                {/* Product Image - Clickable to Product Details Page */}
+                <Link href={`/product/${product._id}`}>
+                  <div className="relative group cursor-pointer">
+                    <Image
+                      src={product.mainImage}
+                      alt={product.name}
+                      width={300}
+                      height={300}
+                      className="rounded-lg object-cover w-full h-auto"
+                      sizes="(max-width: 768px) 100vw, 300px" // Ensure responsive scaling
+                    />
 
-                  {/* Add to Cart Button */}
-                  <div
-                    onClick={() => handleAddToCart(product.id)} // Handle click event
-                    className="absolute bottom-0 left-0 w-full bg-blue-500 text-white px-4 py-2 rounded-b-lg 
-                    opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-center cursor-pointer"
-                  >
-                    Add to Cart
+                    {/* Add to Cart Button */}
+                    <button
+                      className="absolute bottom-0 left-0 w-full bg-blue-500 text-white px-4 py-2 rounded-b-lg 
+                      opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-center"
+                      onClick={() => handleAddToCart(product)}  // Handle click event
+                    >
+                      Add to Cart
+                    </button>
                   </div>
-                </div>
+                </Link>
 
                 {/* Product Name */}
                 <p className="mt-4 text-lg font-semibold text-gray-800">
@@ -118,7 +176,7 @@ const HydraulicPower = () => {
 
                 {/* Product Price */}
                 <p className="text-md font-bold text-blue-500">
-                  {product.price}
+                  ${product.price}
                 </p>
               </div>
             ))}
@@ -127,8 +185,8 @@ const HydraulicPower = () => {
           {/* Next Button */}
           <button
             onClick={handleNext}
-            disabled={startIndex + itemsPerPage >= hydraulic.filter((product) => product.hydraulicPart === true).length}
-            className={`text-2xl px-4 ${startIndex + itemsPerPage >= hydraulic.filter((product) => product.hydraulicPart === true).length
+            disabled={startIndex + itemsPerPage >=   hydraulicPartProducts.length}
+            className={`text-2xl px-4 ${startIndex + itemsPerPage >=   hydraulicPartProducts.length
               ? "text-gray-400"
               : "text-gray-800"
               }`}
@@ -142,3 +200,5 @@ const HydraulicPower = () => {
 };
 
 export default HydraulicPower;
+
+

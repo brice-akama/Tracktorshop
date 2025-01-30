@@ -1,12 +1,7 @@
+import clientPromise from "../../lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { MongoClient } from "mongodb";
 import jwt from "jsonwebtoken";
-
-const uri = process.env.MONGODB_URI || "";
-const client = new MongoClient(uri);
-const db = client.db("tracktorshop"); // Replace with your DB name
-const usersCollection = db.collection("users");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key"; // Use a strong secret key
 
@@ -21,6 +16,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Get the database client and collection using clientPromise
+    const client = await clientPromise;
+    const db = client.db("tracktorshop"); // Replace with your DB name
+    const usersCollection = db.collection("users");
 
     const user = await usersCollection.findOne({ email });
     if (!user) {

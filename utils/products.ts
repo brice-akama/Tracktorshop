@@ -333,8 +333,8 @@ export const hydraulic: Product[] = [
     specialOffer: false, 
     popularSet: false, 
     hydraulicPart: true,
-    tractorBrands: false, // Added hydraulicPart: true
-    description: 'High-performance hydraulic motor for orbital motion control and power transfer.' 
+    tractorBrands: false, // Added hydraulicPa.rt: true
+    description: 'High-performance hydraulic motor for orbital motion control and power transfer' 
   },
   { 
     id: 25, 

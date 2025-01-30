@@ -1,16 +1,48 @@
 "use client";
 
+
+
 import React, { useState, useEffect } from "react";
-import { popularSet } from "../../utils/products"; // Import product data from the utils folder
 import Image from "next/image";
-import { useRouter } from "next/navigation";  // Import Image component
-import Link from "next/link"; // Import Link for navigation
+import { useRouter } from "next/navigation"; // Import Image component
+import Link from "next/link"; 
+import { toast } from 'react-hot-toast'; // Import Link component for navigation
+
+// Define the types for product data
+interface Popular {
+  _id: string;
+  name: string;
+  price: number;
+  mainImage: string;
+  description: string;
+  popularSet: boolean;
+}
 
 const PopularSet = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(4);
+  const [popularSetProducts, setPopularSetProducts] = useState<Popular[]>([]); 
   const router = useRouter();
-  // Default to 4 items
+  const [quantity, setQuantity] = useState(1);
+
+  // Fetch special offer products from the backend API
+  useEffect(() => {
+    const fetchPopularSet = async () => {
+      try {
+        const response = await fetch("/api/product?popularSet=true"); // Your API endpoint
+        if (response.ok) {
+          const data = await response.json();
+          setPopularSetProducts(data.products); // Set fetched data to state
+        } else {
+          console.error("Failed to fetch products");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchPopularSet();
+  }, []);
 
   // Update itemsPerPage based on screen size
   useEffect(() => {
@@ -33,7 +65,7 @@ const PopularSet = () => {
   // Auto-shift the carousel every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      if (startIndex + itemsPerPage < popularSet.filter(product => product.popularSet).length) {
+      if (startIndex + itemsPerPage < popularSetProducts.length) {
         setStartIndex((prev) => prev + 1);
       } else {
         setStartIndex(0); // Reset to the beginning
@@ -44,8 +76,7 @@ const PopularSet = () => {
   }, [startIndex, itemsPerPage]);
 
   const handleNext = () => {
-    const filteredProducts = popularSet.filter(product => product.popularSet);
-    if (startIndex + itemsPerPage < filteredProducts.length) {
+    if (startIndex + itemsPerPage < popularSetProducts.length) {
       setStartIndex(startIndex + 1);
     }
   };
@@ -56,20 +87,46 @@ const PopularSet = () => {
     }
   };
 
-  const handleAddToCart = (productId: string | number) => {
-    // Add product to cart (you can implement cart logic here)
-    // Example: cart.addProduct(productId);
-    router.push("/cart"); // Navigate to the cart page without reloading
-  };
+  
 
-  const filteredProducts = popularSet.filter(product => product.popularSet);
-  const visibleProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  const visibleProducts = popularSetProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
+  // Handle Add to Cart action
+    const handleAddToCart = async (product: Popular) => {  // Accept the product as a parameter
+      const cartItem = {
+        productId: product._id,
+        quantity,
+      };
+      try {
+        const response = await fetch('/api/cart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(cartItem),
+        });
+        const data = await response.json();
+        if (data.error) {
+          toast.error(data.error, { position: 'top-center', duration: 3000 });
+        } else {
+          toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
+          window.dispatchEvent(new Event('cartUpdated'));
+          router.push('/cart');
+        }
+      } catch (error) {
+        toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
+      }
+    };
+  
 
   return (
     <div className="w-full py-12 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-8">
-          POPULAR SETS
+        POPULAR SETS
         </h2>
 
         <div className="flex justify-between items-center">
@@ -85,27 +142,32 @@ const PopularSet = () => {
           {/* Products */}
           <div className="flex justify-center gap-6">
             {visibleProducts.map((product) => (
-              <Link key={product.id} href={`/product/${product.id}`} className="relative border border-gray-300 rounded-lg p-4 w-64 shadow-lg hover:shadow-xl transition-shadow">
-                {/* Product Image */}
-                <div className="relative group">
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    width={300}
-                    height={300}
-                    style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    className="rounded-lg"
-                  />
+              <div
+                key={product._id}
+                className="relative border border-gray-300 rounded-lg p-4 w-64 shadow-lg hover:shadow-xl transition-shadow"
+              >
+                {/* Product Image - Clickable to Product Details Page */}
+                <Link href={`/product/${product._id}`}>
+                  <div className="relative group cursor-pointer">
+                    <Image
+                      src={product.mainImage}
+                      alt={product.name}
+                      width={300}
+                      height={300}
+                      className="rounded-lg object-cover w-full h-auto"
+                      sizes="(max-width: 768px) 100vw, 300px" // Ensure responsive scaling
+                    />
 
-                  {/* Add to Cart Button */}
-                  <button
-                    className="absolute bottom-0 left-0 w-full bg-blue-500 text-white px-4 py-2 rounded-b-lg 
+                    {/* Add to Cart Button */}
+                    <button
+                      className="absolute bottom-0 left-0 w-full bg-blue-500 text-white px-4 py-2 rounded-b-lg 
                       opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-center"
-                    onClick={() => handleAddToCart(product.id)} // Handle click event
-                  >
-                    Add to Cart
-                  </button>
-                </div>
+                      onClick={() => handleAddToCart(product)}  // Handle click event
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                </Link>
 
                 {/* Product Name */}
                 <p className="mt-4 text-lg font-semibold text-gray-800">
@@ -114,17 +176,20 @@ const PopularSet = () => {
 
                 {/* Product Price */}
                 <p className="text-md font-bold text-blue-500">
-                  {product.price}
+                  ${product.price}
                 </p>
-              </Link>
+              </div>
             ))}
           </div>
 
           {/* Next Button */}
           <button
             onClick={handleNext}
-            disabled={startIndex + itemsPerPage >= filteredProducts.length}
-            className={`text-2xl px-4 ${startIndex + itemsPerPage >= filteredProducts.length ? "text-gray-400" : "text-gray-800"}`}
+            disabled={startIndex + itemsPerPage >= popularSetProducts.length}
+            className={`text-2xl px-4 ${startIndex + itemsPerPage >= popularSetProducts.length
+              ? "text-gray-400"
+              : "text-gray-800"
+              }`}
           >
             &gt;
           </button>
@@ -135,3 +200,4 @@ const PopularSet = () => {
 };
 
 export default PopularSet;
+

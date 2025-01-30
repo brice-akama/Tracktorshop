@@ -5,6 +5,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 

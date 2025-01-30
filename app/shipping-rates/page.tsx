@@ -4,18 +4,40 @@ import React, { useState } from "react";
 
 const ShippingRate: React.FC = () => {
   const [shippingMethod, setShippingMethod] = useState<string>("standard");
+  const [shippingCost, setShippingCost] = useState<string>("$0.00");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [zip, setZip] = useState("");
 
-  // Example shipping options
+  // Shipping options (these can be static if the rate calculation is dynamic)
   const shippingOptions = [
     { id: "standard", name: "Standard Shipping", cost: "$5.00", duration: "5-7 business days" },
     { id: "expedited", name: "Expedited Shipping", cost: "$15.00", duration: "2-3 business days" },
     { id: "overnight", name: "Overnight Shipping", cost: "$25.00", duration: "1 business day" },
   ];
 
+  // Calculate shipping cost by calling the API route
+  const calculateShipping = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Make a request to the shipping API to calculate shipping cost
+    const response = await fetch("/api/shipping", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ address, city, zip }),
+    });
+
+    const data = await response.json();
+    
+    // Set the calculated shipping cost
+    setShippingCost(`$${data.shippingCost}`);
+  };
+
   return (
     <div className="container mx-auto px-6 py-16 mt-28">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Shipping Rates</h1>
-
       <div className="text-lg text-gray-600 mb-8">
         <p>
           We offer several shipping options to fit your needs. Please select a shipping method below to see the
@@ -43,7 +65,7 @@ const ShippingRate: React.FC = () => {
       {/* Shipping Address Form */}
       <div className="mb-12">
         <h2 className="text-2xl font-semibold text-gray-800 mt-4">Calculate Shipping Costs</h2>
-        <form>
+        <form onSubmit={calculateShipping}>
           <div className="mb-6">
             <label className="block text-lg font-medium text-gray-700 mb-2" htmlFor="address">
               Shipping Address
@@ -53,6 +75,8 @@ const ShippingRate: React.FC = () => {
               id="address"
               className="w-full p-4 border border-gray-300 rounded-lg"
               placeholder="Enter your shipping address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
             />
           </div>
 
@@ -65,6 +89,8 @@ const ShippingRate: React.FC = () => {
               id="city"
               className="w-full p-4 border border-gray-300 rounded-lg"
               placeholder="Enter your city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
             />
           </div>
 
@@ -77,6 +103,8 @@ const ShippingRate: React.FC = () => {
               id="zip"
               className="w-full p-4 border border-gray-300 rounded-lg"
               placeholder="Enter your zip code"
+              value={zip}
+              onChange={(e) => setZip(e.target.value)}
             />
           </div>
 
@@ -89,8 +117,13 @@ const ShippingRate: React.FC = () => {
         </form>
       </div>
 
-      {/* Call to Action / Checkout Button */}
+      {/* Display the dynamic shipping cost */}
       <div className="text-center">
+        <p className="text-xl font-semibold">Shipping Cost: {shippingCost}</p>
+      </div>
+
+      {/* Call to Action / Checkout Button */}
+      <div className="text-center mt-6">
         <button
           className="bg-green-600 text-white py-4 px-8 rounded-lg hover:bg-green-700"
           onClick={() => alert("Proceeding to checkout...")}

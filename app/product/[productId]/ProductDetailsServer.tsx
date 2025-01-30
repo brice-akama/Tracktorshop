@@ -1,24 +1,42 @@
 // app/product/[productId]/ProductDetailsServer.tsx
-
-import { imagegrid, products, popularSet, diesel, hydraulic } from "../../../utils/products";
+import { ProductDetailsServerProps } from "../../../types/ProductDetailsServerProps"; // Adjust the relative path
+import { Product } from "../../../types/Product"; // Adjust the relative path
 import ProductDetails from "./ProductDetails";
 
-// Server-side logic for fetching product data
-const ProductDetailsServer = async ({ params }: { params: { productId: string } }) => {
-  const productId = parseInt(params.productId);
-  const allProducts = [...imagegrid, ...products, ...popularSet, ...diesel, ...hydraulic];
+const ProductDetailsServer = async ({ params }: ProductDetailsServerProps) => {
+  const { productId } = await params;  // Awaiting params before destructuring
 
-  const product = allProducts.find((p) => p.id === productId);
-  if (!product) {
-    return <p>Product not found</p>;
+  try {
+    // Fetch product details and related products using the productId
+    const productResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/api/product?productId=${productId}`
+    );
+
+    if (!productResponse.ok) {
+      return <p>Product not found</p>;
+    }
+
+    const { product, relatedProducts } = await productResponse.json();
+
+    // Filter related products, excluding the current one, limiting to 4 products
+    const filteredRelatedProducts = relatedProducts
+      .filter((relatedProduct: Product) => relatedProduct._id !== product._id)
+      .slice(0, 4);
+
+    return (
+      <ProductDetails
+        product={{
+          ...product,
+          imageUrl: product.mainImage,  // Mapping mainImage to imageUrl
+          thumbnails: product.images,  // Mapping images to thumbnails
+        }}
+        relatedProducts={filteredRelatedProducts}
+      />
+    );
+  } catch (error) {
+    console.error("Error fetching product details:", error);
+    return <p>Unable to fetch product details. Please try again later.</p>;
   }
-
-  // Filter related products based on the same category
-  const relatedProducts = allProducts.filter(
-    (p) => p.category === product.category && p.id !== product.id
-  ).slice(0, 4);
-
-  return <ProductDetails product={product} relatedProducts={relatedProducts} />;
 };
 
 export default ProductDetailsServer;

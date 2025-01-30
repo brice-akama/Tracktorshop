@@ -1,11 +1,13 @@
+import clientPromise from "../../lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { MongoClient } from "mongodb";
+import { ObjectId } from "mongodb";
 
-const uri = process.env.MONGODB_URI || "";
-const client = new MongoClient(uri);
-const db = client.db("tracktorshop"); // Replace with your DB name
-const usersCollection = db.collection("users");
+async function getUsersCollection() {
+  const client = await clientPromise;
+  const db = client.db("tracktorshop"); // Replace with your DB name
+  return db.collection("users");
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +21,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const usersCollection = await getUsersCollection();
     const existingUser = await usersCollection.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -44,6 +47,51 @@ export async function POST(request: NextRequest) {
     console.error("Error handling registration:", error); // Log errors
     return NextResponse.json(
       { error: "Something went wrong. Please try again later." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const usersCollection = await getUsersCollection();
+    const users = await usersCollection.find().toArray();
+    return NextResponse.json({ users }, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch users" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { id } = await req.json(); // Fetch user ID from request body
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const usersCollection = await getUsersCollection();
+    const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      { message: "User deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
       { status: 500 }
     );
   }

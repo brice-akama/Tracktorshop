@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 type ReviewFormProps = {
   productId: string;
@@ -16,14 +17,34 @@ const ReviewForm = ({ productId }: ReviewFormProps) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Assuming you would handle the review submission here (e.g., via an API)
-    const reviewData = { productId, name, rating, content };
-    
-    // TODO: Implement review submission logic (e.g., POST request to API)
+    try {
+      const reviewData = { productId, reviewerName: name, reviewText: content, rating };
 
-    console.log('Review submitted:', reviewData);
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reviewData),
+      });
 
-    setIsSubmitting(false);
+      if (response.ok) {
+        // Display success notification
+        toast.success("Review submitted successfully!");
+        
+        // Reset form
+        setName('');
+        setContent('');
+        setRating(0);
+      } else {
+        // Display error notification for failed submission
+        toast.error("Failed to submit review. Please try again.");
+      }
+    } catch (error) {
+      // Display error notification for network issues
+      toast.error("Error submitting review. Please try again.");
+      console.error("Error submitting review:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

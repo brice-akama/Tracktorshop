@@ -49,6 +49,11 @@ const Footer: React.FC = () => {
               </Link>
             </li>
             <li>
+              <Link href="/blog" className="hover:text-white">
+                Blog
+              </Link>
+            </li>
+            <li>
               <Link href="/privacy-policy" className="hover:text-white">
                 Private Policy                                                           
               </Link>

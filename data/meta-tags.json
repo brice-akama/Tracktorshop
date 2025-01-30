@@ -1,0 +1,28 @@
+{
+  "/": {
+    "title": "Home - PowerPlow",
+    "description": "Explore high-quality tractor parts at PowerPlow.",
+    "keywords": ["tractors", "tractor parts", "premium quality"],
+    "canonical": "https://powerplow.com",
+    "robots": "index, follow",
+    "openGraph": {
+      "title": "Home - PowerPlow",
+      "description": "Explore premium tractor parts at PowerPlow.",
+      "image": "/og-home.jpg",
+      "url": "https://powerplow.com"
+    }
+  },
+  "/product/[productId]": {
+    "title": "Engine Part - Buy Now",
+    "description": "Discover Engine Part. High-quality product available at affordable prices.",
+    "keywords": ["Engine Part", "buy now", "affordable"],
+    "canonical": "https://powerplow.com/product/[productId]",
+    "robots": "index, follow",
+    "openGraph": {
+      "title": "Engine Part - Buy Now",
+      "description": "Discover Engine Part. High-quality product available at affordable prices.",
+      "image": "https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/your-image.jpg",
+      "url": "https://powerplow.com/product/[productId]"
+    }
+  }
+}

@@ -1,101 +1,149 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { imagegrid } from "../../utils/products";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link"; // Import Link from Next.js
+import Link from "next/link";
+
+// Define the Product interface
+interface Product {
+    _id: string;
+    name: string;
+    category: string;
+    price: number;
+    quantity: number;
+    description: string;
+    specialOffer: boolean;
+    popularSet: boolean;
+    hydraulicPart: boolean;
+    tractorBrands: boolean;
+    mainImage: string;
+    images: string[];
+    createdAt: string;
+}
 
 const ProductPage = () => {
-  const searchParams = useSearchParams();
-  const categoryFromUrl = searchParams.get("category"); // Get the "category" query parameter
-  const [visibleImages, setVisibleImages] = useState(23);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [visibleImages, setVisibleImages] = useState(23);
 
-  // Extract unique categories
-  const categories = Array.from(
-    new Set(imagegrid.map((product) => product.category).filter(Boolean))
-  ) as string[];
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch("/api/product");
+                const data = await response.json();
 
-  // Filter products based on the category from the URL
-  const filteredProducts = categoryFromUrl
-    ? imagegrid.filter((product) => product.category === categoryFromUrl)
-    : imagegrid.slice(0, visibleImages);
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                } else if (Array.isArray(data.products)) {
+                    setProducts(data.products);
+                } else {
+                    console.error("Unexpected API response:", data);
+                }
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        };
 
-  return (
-    <div className="container mx-auto p-4 mt-20">
-      {/* Responsive Layout Container */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-10">
-        {/* Categories Section */}
-        <aside className="md:col-span-3 border-b md:border-r md:border-b-0 border-gray-200 pb-4 md:pb-0 md:pr-4">
-          <h2 className="font-bold text-lg mb-4 text-center md:text-left mt-8">
-            Category
-          </h2>
-          <ul className="space-y-2 md:space-y-0 md:space-x-2 md:flex md:flex-col">
-            {categories.map((category, index) => (
-              <li key={index}>
-                <a
-                  href={`/product?category=${encodeURIComponent(category)}`} // Update the URL with the selected category
-                  className={`block w-full text-left py-2 px-4 rounded-lg ${categoryFromUrl === category
-                      ? "bg-blue-500 text-white font-bold"
-                      : "hover:bg-blue-100 text-gray-700"
-                    }`}
-                >
-                  {category}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </aside>
+        fetchProducts();
+    }, []);
 
-        {/* Products Section */}
-        <main className="md:col-span-9">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-            {filteredProducts.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.id}`} // Navigate to dynamic product details page
-              >
-                <div
-                  className="border border-gray-300 rounded-lg p-4 text-center shadow-sm hover:shadow-lg transition cursor-pointer"
-                >
-                  <div className="relative w-full h-48 mb-4 group overflow-hidden mt-16">
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.name}
-                      width={300}
-                      height={300}
-                      className="rounded-lg object-cover" // This will ensure the image behaves like "cover"
-                    />
-                  </div>
+    // Extract unique categories
+    const categories = Array.from(
+        new Set(products.map((product) => product.category).filter(Boolean))
+    );
 
-                  <h3
-                    className="font-semibold text-lg md:text-xl truncate w-full overflow-hidden whitespace-nowrap text-ellipsis"
-                    title={product.name} // Optional: Shows full name on hover
-                  >
-                    {product.name}
-                  </h3>
+    // Handle category toggle
+    const handleCategoryClick = (category: string) => {
+        if (selectedCategory === category) {
+            setSelectedCategory(null);
+            router.push("/product"); // Reset URL to default
+        } else {
+            setSelectedCategory(category);
+            router.push(`/product?category=${encodeURIComponent(category)}`);
+        }
+    };
 
-                  <p className="text-blue-500 font-bold">{product.price}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+    // Filter products based on the selected category
+    const filteredProducts = selectedCategory
+        ? products.filter((product) => product.category === selectedCategory)
+        : products.slice(0, visibleImages);
 
-          {/* Load More Button */}
-          {!categoryFromUrl && visibleImages < imagegrid.length && (
-            <div className="text-center mt-6">
-              <button
-                onClick={() => setVisibleImages((prev) => prev + 10)}
-                className="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition"
-              >
-                Load More
-              </button>
+    return (
+        <div className="container mx-auto p-4 mt-20">
+            {/* Responsive Layout Container */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-10">
+                {/* Categories Section */}
+                <aside className="md:col-span-3 border-b md:border-r md:border-b-0 border-gray-200 pb-4 md:pb-0 md:pr-4">
+                    <h2 className="font-bold text-lg mb-4 text-center md:text-left mt-8">
+                        Category
+                    </h2>
+                    <ul className="space-y-2 md:space-y-0 md:space-x-2 md:flex md:flex-col">
+                        {categories.map((category, index) => (
+                            <li key={index}>
+                                <button
+                                    onClick={() => handleCategoryClick(category)}
+                                    className={`block w-full text-left py-2 px-4 rounded-lg ${
+                                        selectedCategory === category
+                                            ? "bg-blue-500 text-white font-bold"
+                                            : "hover:bg-blue-100 text-gray-700"
+                                    }`}
+                                >
+                                    {category}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </aside>
+
+                {/* Products Section */}
+                <main className="md:col-span-9">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+                        {filteredProducts.map((product) => (
+                            <Link key={product._id} href={`/product/${product._id}`}>
+                                <div className="border border-gray-300 rounded-lg p-4 text-center shadow-sm hover:shadow-lg transition cursor-pointer">
+                                    <div className="relative w-full h-48 mb-4 group overflow-hidden mt-16">
+                                        <Image
+                                            src={product.mainImage}
+                                            alt={product.name}
+                                            width={300}
+                                            height={300}
+                                            className="rounded-lg object-cover"
+                                        />
+                                    </div>
+
+                                    <h3
+                                        className="font-semibold text-lg md:text-xl truncate w-full overflow-hidden whitespace-nowrap text-ellipsis"
+                                        title={product.name}
+                                    >
+                                        {product.name}
+                                    </h3>
+
+                                    <p className="text-blue-500 font-bold">
+                                        ${product.price}
+                                    </p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* Load More Button */}
+                    {!selectedCategory && visibleImages < products.length && (
+                        <div className="text-center mt-6">
+                            <button
+                                onClick={() => setVisibleImages((prev) => prev + 10)}
+                                className="px-6 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition"
+                            >
+                                Load More
+                            </button>
+                        </div>
+                    )}
+                </main>
             </div>
-          )}
-        </main>
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default ProductPage;

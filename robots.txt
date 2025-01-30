@@ -1,0 +1,8 @@
+# Allow all crawlers to index the site
+User-agent: *
+Disallow: /admin/        # Block the admin section
+Disallow: /login/        # Block the login page
+Disallow: /checkout/     # Block the checkout page
+
+# Sitemap location
+Sitemap: https://your-website.com/api/sitemap.xml

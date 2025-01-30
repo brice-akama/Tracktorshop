@@ -1,20 +1,24 @@
 // app/product/[productId]/ProductDetails.tsx
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Import the useRouter hook
+import { useRouter } from "next/navigation";
 import ReviewForm from './reviewForm';
+import ReviewList from "./reviewList";
+import { toast } from 'react-hot-toast'; 
+import MetaTags from "@/app/components/MetaTags";
 
+// Define Product and Props types
 type Product = {
-  id: number;
+  _id: string;
   name: string;
   price: string;
-  imageUrl: string;
+  mainImage: string;
   description: string;
   category?: string;
-  thumbnails: string[];
+  images: string[];
 };
 
 type ProductDetailsProps = {
@@ -23,40 +27,81 @@ type ProductDetailsProps = {
 };
 
 const ProductDetails = ({ product, relatedProducts }: ProductDetailsProps) => {
-  const [mainImage, setMainImage] = useState(product.imageUrl);
-  const [quantity, setQuantity] = useState(1); // Track the selected quantity
+  const [mainImage, setMainImage] = useState(product.mainImage);
+  const [quantity, setQuantity] = useState(1);
   const [isReviewFormVisible, setIsReviewFormVisible] = useState(false);
-  const router = useRouter(); // Initialize the useRouter hook
+  const [isReviewListVisible, setIsReviewListVisible] = useState(false);
+  
+  const router = useRouter();
 
-  // Function to toggle the visibility of the review form
+  // Toggle Review Form visibility
   const toggleReviewForm = () => {
     setIsReviewFormVisible((prev) => !prev);
   };
 
-  // Handle Add to Cart functionality
-  const handleAddToCart = () => {
-    // Simulate adding the product to the cart
+  // Toggle Review List visibility
+  const toggleReviewList = () => {
+    setIsReviewListVisible(!isReviewListVisible);
+  };
+
+  // Handle Add to Cart action
+  const handleAddToCart = async () => {
     const cartItem = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
+      productId: product._id,
       quantity,
-      imageUrl: product.imageUrl,
     };
-
-    // Save the cart item to localStorage or your desired state management
-    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    localStorage.setItem('cart', JSON.stringify([...existingCart, cartItem]));
-
-    // Navigate to the cart page
-    router.push('/cart');
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cartItem),
+      });
+      const data = await response.json();
+      if (data.error) {
+        toast.error(data.error, { position: 'top-center', duration: 3000 });
+      } else {
+        toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
+        window.dispatchEvent(new Event('cartUpdated'));
+        router.push('/cart');
+      }
+    } catch (error) {
+      toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
+    }
   };
 
   return (
     <div className="max-w-5xl mx-auto p-4 mt-10 lg:pl-6 lg:ml-17">
-      {/* Product Details */}
+      {/* Meta Tags for SEO */}
+      <MetaTags pagePath={`/product/${product._id}`} /> 
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product.name,
+            "image": product.mainImage,
+            "description": product.description,
+            "sku": product._id,
+            "offers": {
+              "@type": "Offer",
+              "url": `/product/${product._id}`,
+              "priceCurrency": "USD",
+              "price": product.price,
+              "priceValidUntil": "2025-12-31",
+              "itemCondition": "https://schema.org/NewCondition",
+              "availability": "https://schema.org/InStock",
+            },
+          }),
+        }}
+      ></script>
+
+      {/* Product Details Section */}
       <div className="flex flex-col lg:flex-row gap-8 mt-10">
-        {/* Left Section: Images */}
         <div className="flex-1 flex flex-col gap-4 mt-10">
           <div className="border rounded-md mt-8">
             <Image
@@ -68,7 +113,7 @@ const ProductDetails = ({ product, relatedProducts }: ProductDetailsProps) => {
             />
           </div>
           <div className="flex gap-4">
-            {[product.imageUrl, ...product.thumbnails].map((image, index) => (
+            {[product.mainImage, ...product.images].map((image, index) => (
               <button
                 key={index}
                 onClick={() => setMainImage(image)}
@@ -86,7 +131,6 @@ const ProductDetails = ({ product, relatedProducts }: ProductDetailsProps) => {
           </div>
         </div>
 
-        {/* Right Section: Product Info */}
         <div className="flex-1 mt-12">
           <h1 className="text-3xl font-bold mt-8">{product.name}</h1>
           <p className="text-xl font-semibold mt-4">{product.price}</p>
@@ -105,7 +149,7 @@ const ProductDetails = ({ product, relatedProducts }: ProductDetailsProps) => {
           </div>
           <div className="mt-6">
             <button
-              onClick={handleAddToCart} // Attach the click handler
+              onClick={handleAddToCart}
               className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
             >
               Add to Cart
@@ -120,29 +164,37 @@ const ProductDetails = ({ product, relatedProducts }: ProductDetailsProps) => {
         <p>{product.description}</p>
       </div>
 
-      {/* Reviews Section */}
+      {/* Customer Reviews Section */}
       <div className="mt-12">
         <h2
           className="text-xl font-bold mb-4 cursor-pointer text-blue-600"
-          onClick={toggleReviewForm}
+          onClick={toggleReviewList}
         >
           Customer Reviews
         </h2>
-        <p className="text-gray-500 mt-4">No reviews yet. Be the first to write a review!</p>
-        {isReviewFormVisible && <ReviewForm productId={String(product.id)} />}
+        {isReviewListVisible && <ReviewList productId={product._id} />}
+        <div className="mt-4">
+          <button
+            className="text-blue-600 hover:text-blue-800"
+            onClick={toggleReviewForm}
+          >
+            {isReviewFormVisible ? 'Hide Review Form' : 'Write a Review'}
+          </button>
+          {isReviewFormVisible && <ReviewForm productId={String(product._id)} />}
+        </div>
       </div>
 
-      {/* Related Products Section */}
+      {/* Related Products */}
       <div className="mt-12">
         <h2 className="text-xl font-bold text-center mb-4">Related Products</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {relatedProducts.map((relatedProduct) => (
             <div
-              key={relatedProduct.id}
+              key={relatedProduct._id}
               className="border rounded-md p-2 group relative"
             >
               <Image
-                src={relatedProduct.imageUrl}
+                src={relatedProduct.mainImage}
                 alt={relatedProduct.name}
                 width={200}
                 height={200}
@@ -151,7 +203,7 @@ const ProductDetails = ({ product, relatedProducts }: ProductDetailsProps) => {
               <h3 className="text-lg font-semibold mt-2">{relatedProduct.name}</h3>
               <p className="text-gray-600">{relatedProduct.price}</p>
               <Link
-                href={`/product/${relatedProduct.id}`}
+                href={`/product/${relatedProduct._id}`}
                 className="absolute inset-0 z-10"
                 aria-label={`View details of ${relatedProduct.name}`}
               />

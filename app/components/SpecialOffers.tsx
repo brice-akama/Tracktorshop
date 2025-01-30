@@ -1,15 +1,46 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { products } from "../../utils/products"; // Import product data from the utils folder
 import Image from "next/image";
-import { useRouter } from "next/navigation";  // Import Image component
-import Link from "next/link"; // Import Link component for navigation
+import { useRouter } from "next/navigation"; // Import Image component
+import Link from "next/link";
+import { toast } from 'react-hot-toast';  // Import Link component for navigation
+
+// Define the types for product data
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  mainImage: string;
+  description: string;
+  specialOffer: boolean;
+}
 
 const SpecialOffers = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(4);
-  const router = useRouter(); // Default to 4 items
+  const [specialOfferProducts, setSpecialOfferProducts] = useState<Product[]>([]); // State to store special offers
+  const router = useRouter();
+  const [quantity, setQuantity] = useState(1);
+
+  // Fetch special offer products from the backend API
+  useEffect(() => {
+    const fetchSpecialOffers = async () => {
+      try {
+        const response = await fetch("/api/product?specialOffer=true"); // Your API endpoint
+        if (response.ok) {
+          const data = await response.json();
+          setSpecialOfferProducts(data.products); // Set fetched data to state
+        } else {
+          console.error("Failed to fetch products");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchSpecialOffers();
+  }, []);
 
   // Update itemsPerPage based on screen size
   useEffect(() => {
@@ -54,19 +85,37 @@ const SpecialOffers = () => {
     }
   };
 
-  const handleAddToCart = (productId: string | number) => {
-    // Add product to cart (you can implement cart logic here)
-    // Example: cart.addProduct(productId);
-    router.push("/cart"); // Navigate to the cart page without reloading
-  };
-
-  // Filter products with specialOffer: true
-  const specialOfferProducts = products.filter((product) => product.specialOffer === true);
-
   const visibleProducts = specialOfferProducts.slice(
     startIndex,
     startIndex + itemsPerPage
   );
+
+  // Handle Add to Cart action
+  const handleAddToCart = async (product: Product) => {  // Accept the product as a parameter
+    const cartItem = {
+      productId: product._id,
+      quantity,
+    };
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cartItem),
+      });
+      const data = await response.json();
+      if (data.error) {
+        toast.error(data.error, { position: 'top-center', duration: 3000 });
+      } else {
+        toast.success('Item added to cart!', { position: 'top-center', duration: 3000 });
+        window.dispatchEvent(new Event('cartUpdated'));
+        router.push('/cart');
+      }
+    } catch (error) {
+      toast.error('Failed to add item to cart. Please try again later.', { position: 'top-center', duration: 3000 });
+    }
+  };
 
   return (
     <div className="w-full py-12 px-4 sm:px-8">
@@ -89,26 +138,26 @@ const SpecialOffers = () => {
           <div className="flex justify-center gap-6">
             {visibleProducts.map((product) => (
               <div
-                key={product.id}
+                key={product._id}
                 className="relative border border-gray-300 rounded-lg p-4 w-64 shadow-lg hover:shadow-xl transition-shadow"
               >
                 {/* Product Image - Clickable to Product Details Page */}
-                <Link href={`/product/${product.id}`}>
+                <Link href={`/product/${product._id}`}>
                   <div className="relative group cursor-pointer">
                     <Image
-                      src={product.imageUrl}
+                      src={product.mainImage}
                       alt={product.name}
                       width={300}
                       height={300}
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      className="rounded-lg"
+                      className="rounded-lg object-cover w-full h-auto"
+                      sizes="(max-width: 768px) 100vw, 300px" // Ensure responsive scaling
                     />
 
                     {/* Add to Cart Button */}
                     <button
                       className="absolute bottom-0 left-0 w-full bg-blue-500 text-white px-4 py-2 rounded-b-lg 
                       opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-center"
-                      onClick={() => handleAddToCart(product.id)} // Handle click event
+                      onClick={() => handleAddToCart(product)} // Pass product to the function
                     >
                       Add to Cart
                     </button>
@@ -122,7 +171,7 @@ const SpecialOffers = () => {
 
                 {/* Product Price */}
                 <p className="text-md font-bold text-blue-500">
-                  {product.price}
+                  ${product.price}
                 </p>
               </div>
             ))}
