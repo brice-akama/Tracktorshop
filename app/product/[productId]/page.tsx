@@ -1,9 +1,15 @@
 // app/product/[productId]/page.tsx
 
+import { NextPage } from 'next';
 import ProductDetailsServer from "./ProductDetailsServer";
 import MetaTags from "@/app/components/MetaTags";
 
-const ProductPage = async ({ params }: { params: { productId: string } }) => {
+interface ProductPageProps {
+  params: { productId: string };
+}
+
+// Use NextPage to automatically type `params`
+const ProductPage: NextPage<ProductPageProps> = async ({ params }) => {
   const { productId } = params; // No need to await params
 
   const pagePath = `/product/${productId}`;
@@ -17,5 +23,7 @@ const ProductPage = async ({ params }: { params: { productId: string } }) => {
 };
 
 export default ProductPage;
+
+
 
 

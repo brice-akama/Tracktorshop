@@ -1,75 +1,85 @@
 // app/api/meta-tags/product/[productId]/route.ts
-import { ObjectId } from 'mongodb';
-import clientPromise from "../../../../lib/mongodb"; // Adjust the path to your database connection
-import { NextResponse } from 'next/server';
+import { ObjectId } from "mongodb";
+import clientPromise from "../../../../lib/mongodb";
+import { NextRequest, NextResponse } from "next/server";
 
-// Typing the context properly
-export async function GET(request: Request, { params }: { params: { productId: string } }) {
-  try {
-    const { productId } = params;  // No need to use await here
-
-    // Validate product ID
-    if (!ObjectId.isValid(productId)) {
-      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
-    }
-
-    // Connect to the database
-    const client = await clientPromise;
-    const db = client.db("product"); // Adjust DB name if necessary
-    const productsCollection = db.collection("products");
-
-    // Find the product by ID
-    const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
-
-    // If the product is not found
-    if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
-
-    // Construct the meta tags for the product
-    const metaTags = {
-      title: product.name,
-      description: product.description,
-      keywords: product.keywords || [],
-      canonical: `/product/${productId}`,
-      robots: 'index, follow',
-      openGraph: {
-        title: product.name,
-        description: product.description,
-        image: product.image || '/default-image.jpg',
-        url: `/product/${productId}`,
-      },
-    };
-
-    // Return the meta tags
-    return NextResponse.json(metaTags);
-  } catch (error) {
-    console.error("Error occurred:", error);
-    return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
-  }
+interface RouteContext {
+  params: Promise<{ productId: string }>; // Ensure params is treated as a Promise
 }
 
-export async function POST(request: Request, { params }: { params: { productId: string } }) {
+export async function GET(
+  request: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { productId } = params;
+    const { productId } = await context.params; // ✅ Await params
 
-    if (!ObjectId.isValid(productId)) {
-      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
+    if (!productId) {
+      return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
     }
 
-    const body = await request.json();
-
-    const { title, description, keywords, canonical, productDescription } = body;
-
-    if (!title || !description || !canonical || !productDescription) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    if (!ObjectId.isValid(productId)) {
+      return NextResponse.json({ error: "Invalid product ID format" }, { status: 400 });
     }
 
     const client = await clientPromise;
     const db = client.db("product");
     const productsCollection = db.collection("products");
 
-    // Update or create meta tags and product description for the product
+    const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    const metaTags = {
+      title: product.name,
+      description: product.description,
+      keywords: product.keywords || [],
+      canonical: `/product/${productId}`,
+      robots: "index, follow",
+      openGraph: {
+        title: product.name,
+        description: product.description,
+        image: product.image || "/default-image.jpg",
+        url: `/product/${productId}`,
+      },
+    };
+
+    return NextResponse.json(metaTags);
+  } catch (error) {
+    console.error("Error occurred:", error);
+    return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
+  }
+}
+
+
+export async function POST(
+  request: NextRequest,
+  context: RouteContext
+) {
+  try {
+    const { productId } = await context.params; // ✅ Await params
+
+    if (!productId) {
+      return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
+    }
+
+    if (!ObjectId.isValid(productId)) {
+      return NextResponse.json({ error: "Invalid product ID format" }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const { title, description, keywords, canonical, productDescription } = body;
+
+    if (!title || !description || !canonical || !productDescription) {
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db("product");
+    const productsCollection = db.collection("products");
+
     const updateResult = await productsCollection.updateOne(
       { _id: new ObjectId(productId) },
       {
@@ -78,17 +88,17 @@ export async function POST(request: Request, { params }: { params: { productId: 
           "meta.description": description,
           "meta.keywords": keywords || [],
           "meta.canonical": canonical,
-          "description": productDescription, // Update the product description
+          "description": productDescription,
         },
       },
       { upsert: true }
     );
 
     return NextResponse.json({
-      message: updateResult.modifiedCount > 0 ? 'Product updated' : 'Product created',
+      message: updateResult.modifiedCount > 0 ? "Product updated" : "Product created",
     });
   } catch (error) {
     console.error("Error occurred:", error);
-    return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+    return NextResponse.json({ error: "Database connection failed" }, { status: 500 });
   }
 }

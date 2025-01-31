@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import toast from "react-hot-toast";
 import { useSearchParams } from "next/navigation";
 
@@ -19,7 +19,6 @@ const AdminReviewsPanel = () => {
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId"); // Optional: Filter reviews by product ID
 
-  // Fetch reviews from the API
   const fetchReviews = async () => {
     setIsLoading(true); // Start loading
     try {
@@ -41,9 +40,8 @@ const AdminReviewsPanel = () => {
 
   useEffect(() => {
     fetchReviews(); // Call fetchReviews on component load and when productId changes
-  }, [productId, fetchReviews]); // Added fetchReviews to dependencies
+  }, [productId]);
 
-  // Handle review update
   const updateReview = async (reviewId: string, updatedReview: Partial<Review>) => {
     try {
       const response = await fetch(`/api/reviews`, {
@@ -55,8 +53,6 @@ const AdminReviewsPanel = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success("Review updated successfully");
-
-        // Update the review in state without re-fetching all reviews
         setReviews((prevReviews) =>
           prevReviews.map((review) =>
             review._id === reviewId ? { ...review, ...updatedReview, updatedAt: new Date().toISOString() } : review
@@ -70,7 +66,6 @@ const AdminReviewsPanel = () => {
     }
   };
 
-  // Handle review deletion
   const deleteReview = async (reviewId: string) => {
     if (!confirm("Are you sure you want to delete this review?")) return;
 
@@ -157,4 +152,10 @@ const AdminReviewsPanel = () => {
   );
 };
 
-export default AdminReviewsPanel;
+export default function ReviewsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminReviewsPanel />
+    </Suspense>
+  );
+}

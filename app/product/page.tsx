@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-// Define the Product interface
-interface Product {
+// Define Product type
+type Product = {
     _id: string;
     name: string;
     category: string;
@@ -20,7 +20,7 @@ interface Product {
     mainImage: string;
     images: string[];
     createdAt: string;
-}
+};
 
 const ProductPage = () => {
     const searchParams = useSearchParams();
@@ -50,32 +50,27 @@ const ProductPage = () => {
         fetchProducts();
     }, []);
 
-    // Extract unique categories
     const categories = Array.from(
         new Set(products.map((product) => product.category).filter(Boolean))
     );
 
-    // Handle category toggle
     const handleCategoryClick = (category: string) => {
         if (selectedCategory === category) {
             setSelectedCategory(null);
-            router.push("/product"); // Reset URL to default
+            router.push("/product");
         } else {
             setSelectedCategory(category);
             router.push(`/product?category=${encodeURIComponent(category)}`);
         }
     };
 
-    // Filter products based on the selected category
     const filteredProducts = selectedCategory
         ? products.filter((product) => product.category === selectedCategory)
         : products.slice(0, visibleImages);
 
     return (
         <div className="container mx-auto p-4 mt-20">
-            {/* Responsive Layout Container */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-10">
-                {/* Categories Section */}
                 <aside className="md:col-span-3 border-b md:border-r md:border-b-0 border-gray-200 pb-4 md:pb-0 md:pr-4">
                     <h2 className="font-bold text-lg mb-4 text-center md:text-left mt-8">
                         Category
@@ -98,7 +93,6 @@ const ProductPage = () => {
                     </ul>
                 </aside>
 
-                {/* Products Section */}
                 <main className="md:col-span-9">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
                         {filteredProducts.map((product) => (
@@ -129,7 +123,6 @@ const ProductPage = () => {
                         ))}
                     </div>
 
-                    {/* Load More Button */}
                     {!selectedCategory && visibleImages < products.length && (
                         <div className="text-center mt-6">
                             <button
@@ -146,4 +139,10 @@ const ProductPage = () => {
     );
 };
 
-export default ProductPage;
+export default function ProductPageWrapper() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ProductPage />
+        </Suspense>
+    );
+}
