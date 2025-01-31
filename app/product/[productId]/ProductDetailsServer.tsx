@@ -9,7 +9,7 @@ const ProductDetailsServer = async ({ params }: ProductDetailsServerProps) => {
   try {
     // Fetch product details and related products using the productId
     const productResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL}/api/product?productId=${productId}`
+      `/api/product?productId=${productId}`  // Using relative API path
     );
 
     if (!productResponse.ok) {
